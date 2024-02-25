@@ -16,14 +16,19 @@ class login {
         if (!user) {
             return res.json("User not find");
         }
-        console.log(password);
+
+        
         if (!(await Hash.verify(password, user.password))) {
             return res.json("Password or email incorrect");
         }
 
-        const token = jwt.sign({ email }, jwtConfig.secretKey, {
-            expiresIn: jwtConfig.expiresIn,
-        });
+        const token = jwt.sign(
+            { email: user.email, id: user.id },
+            jwtConfig.secretKey,
+            {
+                expiresIn: jwtConfig.expiresIn,
+            }
+        );
 
         res.json({ token });
     }

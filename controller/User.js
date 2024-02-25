@@ -13,12 +13,12 @@ class Users {
     }
     async store(req, res) {
         try {
-            const { name, email, password } = req.body;
+            const { name, email, password, access="STUDENT" } = req.body;
 
             const password_hash = await Hash.hashing(password);
 
             const user = await prisma.user.create({
-                data: { name, email, password: password_hash },
+                data: { name, email, password: password_hash, access },
             });
 
             return res.json(user);
@@ -33,7 +33,7 @@ class Users {
     }
     async show(req, res) {
         try {
-            const { id } = req.params;
+            const id = req.userId;
 
             const user = await prisma.user.findFirst({
                 where: {
@@ -54,10 +54,22 @@ class Users {
     }
     async update(req, res) {
         try {
-            const { id } = req.params;
+            const id = req.userId;
             const { email, name, password } = req.body;
 
-            const password_hash = Hash.hashing(password);
+            let userTemplate = {
+                email,
+                name,
+            };
+
+            if (password) {
+                const password_hash = Hash.hashing(password);
+                userTemplate = {
+                    email,
+                    name,
+                    password: password_hash,
+                };
+            }
 
             let user = await prisma.user.findFirst({
                 where: {
@@ -73,11 +85,7 @@ class Users {
                 where: {
                     id: Number(id),
                 },
-                data: {
-                    email,
-                    name,
-                    password: password_hash,
-                },
+                data: userTemplate,
             });
 
             res.json(user);
@@ -89,7 +97,7 @@ class Users {
     }
     async delete(req, res) {
         try {
-            const { id } = req.params;
+            const id = req.userId;
 
             let user = await prisma.user.findFirst({
                 where: {
@@ -109,9 +117,8 @@ class Users {
 
             res.json("User successfully deleted");
         } catch (error) {
-            console.error(error.message);
-
             res.status(401).json({ Error: ["Invalid request"] });
+            console.error(error.message);
         }
     }
 }
