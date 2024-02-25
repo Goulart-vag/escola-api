@@ -1,0 +1,15 @@
+version: '16.2'
+
+services:
+    bd:
+        image: "postgres"
+        ports:
+            - 5555:5432
+        environment:
+            - POSTGRES_PASSWORD=uv-RRbf2
+            - POSTGRES_USER=vinicius
+            - POSTGRES_DB=escola
+        volumes:
+            - pg-data:/var/lib/postgresql/data
+volumes:
+    pg-data:
